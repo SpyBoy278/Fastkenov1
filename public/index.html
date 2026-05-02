@@ -3,588 +3,376 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>FastKeno</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<title>Fast Keno</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  :root{
-    --bg:#040d1a;
-    --panel:#070f22;
-    --card:#0a1529;
-    --border:#1a3060;
-    --gold:#f5c518;
-    --gold2:#ffaa00;
-    --cyan:#00e5ff;
-    --green:#00ff88;
-    --red:#ff3b5c;
-    --purple:#b344ff;
-    --selected:#00e5ff;
-    --hit:#f5c518;
-    --miss:#1a2a4a;
-    --text:#cde4ff;
-    --dim:#4a6a99;
-    --glow-cyan:0 0 12px #00e5ff88,0 0 24px #00e5ff44;
-    --glow-gold:0 0 12px #f5c51888,0 0 24px #f5c51844;
-    --glow-green:0 0 12px #00ff8888,0 0 24px #00ff8844;
-  }
-  html,body{height:100%;overflow:hidden;background:var(--bg);}
-  body{
-    font-family:'Rajdhani',sans-serif;
-    color:var(--text);
-    display:flex;flex-direction:column;
-    max-width:430px;margin:0 auto;
-    position:relative;overflow:hidden;
-  }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#1a1a1a;--cell:#333;--cell-border:#444;--header:#111;
+  --green:#2ecc71;--green-btn:#27ae60;--gold:#f0b429;
+  --text:#fff;--dim:#888;--blue:#3498db;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'Noto Sans',sans-serif;color:var(--text);display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
 
-  /* Stars BG */
-  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
-  .stars canvas{width:100%;height:100%;}
+.header{background:var(--header);display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.logo{display:flex;flex-direction:column;line-height:1.1;}
+.logo-fast{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--green);letter-spacing:2px;}
+.logo-keno{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;color:#fff;letter-spacing:2px;}
+.hdr-mid{display:flex;align-items:center;gap:6px;}
+.bal-pill{background:#222;border:1px solid #444;border-radius:16px;padding:4px 10px;display:flex;align-items:center;gap:4px;}
+.bal-v{font-size:12px;font-weight:700;color:var(--gold);}
+.bal-c{font-size:9px;color:var(--dim);}
+.id-pill{background:#222;border:1px solid var(--green);border-radius:16px;padding:4px 8px;font-size:10px;color:var(--green);}
+.hdr-icons{display:flex;gap:10px;color:var(--dim);font-size:18px;}
 
-  /* HEADER */
-  .header{
-    position:relative;z-index:10;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:10px 14px 8px;
-    background:linear-gradient(180deg,#0a1a3a 0%,transparent 100%);
-    border-bottom:1px solid var(--border);
-  }
-  .logo{
-    font-family:'Orbitron',sans-serif;
-    font-size:18px;font-weight:900;
-    background:linear-gradient(90deg,var(--cyan),var(--gold));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    letter-spacing:2px;
-  }
-  .balance-box{
-    display:flex;flex-direction:column;align-items:flex-end;
-    background:rgba(0,229,255,0.08);
-    border:1px solid rgba(0,229,255,0.2);
-    border-radius:8px;padding:4px 10px;
-  }
-  .balance-label{font-size:10px;color:var(--dim);letter-spacing:1px;}
-  .balance-value{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+/* DRAW AREA */
+.draw-area{
+  background:radial-gradient(ellipse at 50% 0%,#0d2e1a 0%,#111 65%);
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+  padding:10px 0 8px;min-height:120px;border-bottom:2px solid #222;position:relative;
+}
+.countdown{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--green);letter-spacing:4px;margin-bottom:6px;}
+.draw-counter{position:absolute;top:10px;right:14px;font-size:12px;color:var(--dim);}
+.big-ball{
+  width:70px;height:70px;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,#607080,#1a2030 72%);
+  border:3px solid #445566;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#fff;
+  box-shadow:0 0 18px rgba(46,204,113,0.25),0 4px 12px rgba(0,0,0,0.6),inset 0 2px 4px rgba(255,255,255,0.12);
+}
+.big-ball.pop{animation:bpop 0.3s ease;}
+@keyframes bpop{0%{transform:scale(0.4);opacity:0;}65%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+.drawn-row{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;justify-content:center;padding:0 10px;}
+.mini-ball{
+  width:28px;height:28px;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,#556,#1a1a2a 75%);
+  border:1.5px solid #556;font-size:9px;font-weight:700;color:#ccc;
+  display:flex;align-items:center;justify-content:center;
+}
+.mini-ball.mhit{background:radial-gradient(circle at 35% 28%,#2ecc71,#0a4a20 75%);border-color:var(--green);color:#fff;box-shadow:0 0 6px rgba(46,204,113,0.5);}
+.wait-msg{text-align:center;padding:8px;}
+.wait-balls{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:6px;}
+.wait-ball{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#445,#1a1a2a 75%);border:2px solid #556;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;color:#fff;}
+.wait-t{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px;}
+.wait-s{font-size:11px;color:var(--dim);}
 
-  /* MAIN */
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:5;}
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid #2a2a2a;flex-shrink:0;background:#111;}
+.tab{flex:1;padding:8px 2px;text-align:center;font-size:10px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
 
-  /* TOP INFO BAR */
-  .info-bar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:6px 14px;
-    background:rgba(10,20,40,0.8);
-    border-bottom:1px solid rgba(26,48,96,0.5);
-  }
-  .pick-info{
-    font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;
-  }
-  .pick-info span{color:var(--cyan);font-weight:700;font-size:13px;}
-  .round-info{font-size:11px;color:var(--dim);}
-  .round-info span{color:var(--text);}
+/* CONTENT */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.play-tab{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 
-  /* GAME AREA */
-  .game-area{
-    flex:1;display:flex;overflow:hidden;padding:8px 10px 6px;gap:8px;
-  }
+/* GRID */
+.grid-wrap{flex:1;overflow-y:auto;padding:5px 7px;scrollbar-width:none;}
+.grid-wrap::-webkit-scrollbar{display:none;}
+.keno-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;}
+.cell{
+  aspect-ratio:1;border-radius:4px;background:var(--cell);border:1px solid var(--cell-border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;color:#bbb;cursor:pointer;
+  position:relative;user-select:none;transition:background 0.1s,border 0.1s;
+}
+.cell:active{transform:scale(0.9);}
+.cell.selected{background:#1e3028;border-color:#2ecc71;}
+.cell.selected::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--blue);}
+.cell.dcell{background:#2a2010;border-color:#d4a010;color:var(--gold);}
+.cell.hcell{background:#0e2a18;border-color:var(--green);color:var(--green);}
+.cell.hcell::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--green);}
+.cell.faded{opacity:0.3;}
 
-  /* PAYTABLE */
-  .paytable{
-    width:72px;flex-shrink:0;
-    background:rgba(7,15,34,0.9);
-    border:1px solid var(--border);
-    border-radius:10px;overflow:hidden;
-    display:flex;flex-direction:column;
-  }
-  .paytable-title{
-    font-size:9px;font-weight:700;letter-spacing:1px;
-    text-align:center;padding:5px 2px;
-    background:rgba(0,229,255,0.12);
-    color:var(--cyan);border-bottom:1px solid var(--border);
-  }
-  .pay-rows{flex:1;overflow-y:auto;scrollbar-width:none;}
-  .pay-rows::-webkit-scrollbar{display:none;}
-  .pay-row{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:3px 6px;border-bottom:1px solid rgba(26,48,96,0.4);
-    font-size:10px;transition:all 0.2s;
-  }
-  .pay-row.active{background:rgba(245,197,24,0.15);border-color:rgba(245,197,24,0.3);}
-  .pay-row.highlight{background:rgba(0,255,136,0.15);border-color:rgba(0,255,136,0.3);}
-  .pay-match{color:var(--dim);font-size:10px;}
-  .pay-mult{color:var(--gold);font-weight:700;font-size:10px;}
-  .pay-row.active .pay-match{color:var(--gold);}
-  .pay-row.highlight .pay-mult{color:var(--green);text-shadow:var(--glow-green);}
+/* BET ROW */
+.bet-row{display:flex;align-items:center;gap:5px;padding:7px 8px;background:#1a1a1a;border-top:1px solid #2a2a2a;flex-shrink:0;}
+.bb{width:30px;height:30px;border-radius:5px;background:#2a2a2a;border:1px solid #444;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-weight:700;}
+.bv{flex:1;text-align:center;font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;color:#fff;}
+.bx2{padding:5px 10px;border-radius:5px;background:#1e3028;border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.bmax{padding:5px 8px;border-radius:5px;background:#2a2a2a;border:1px solid #444;color:#fff;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;}
+.bset{width:30px;height:30px;border-radius:5px;background:#2a2a2a;border:1px solid #444;color:var(--dim);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 
-  /* GRID AREA */
-  .grid-wrap{flex:1;display:flex;flex-direction:column;}
-  .keno-grid{
-    display:grid;grid-template-columns:repeat(8,1fr);
-    gap:4px;flex:1;
-  }
-  .ball{
-    aspect-ratio:1;border-radius:8px;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
-    cursor:pointer;user-select:none;
-    border:1.5px solid rgba(26,48,96,0.8);
-    background:var(--card);
-    color:var(--dim);
-    transition:all 0.15s;position:relative;overflow:hidden;
-  }
-  .ball::before{
-    content:'';position:absolute;inset:0;border-radius:7px;
-    background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,transparent 60%);
-  }
-  .ball:hover:not(.drawn):not(.selected-drawn){
-    border-color:rgba(0,229,255,0.5);
-    color:var(--text);background:#0f1e3d;
-    transform:scale(1.05);
-  }
-  .ball.selected{
-    background:linear-gradient(135deg,#003a6a,#005090);
-    border-color:var(--cyan);
-    color:#fff;
-    box-shadow:0 0 10px rgba(0,229,255,0.4),inset 0 1px 0 rgba(255,255,255,0.1);
-  }
-  .ball.drawn{
-    background:linear-gradient(135deg,#2a1800,#3d2200);
-    border-color:var(--gold2);
-    color:var(--gold);
-    animation:drawPulse 0.4s ease;
-    box-shadow:0 0 12px rgba(245,197,24,0.4);
-  }
-  .ball.selected-drawn{
-    background:linear-gradient(135deg,#003a20,#005530);
-    border-color:var(--green);
-    color:#fff;
-    box-shadow:0 0 14px rgba(0,255,136,0.5);
-    animation:hitPulse 0.5s ease;
-  }
-  .ball.miss{
-    background:rgba(10,20,40,0.4);
-    border-color:rgba(26,48,96,0.3);
-    color:rgba(74,106,153,0.5);
-  }
-  @keyframes drawPulse{
-    0%{transform:scale(1.3);}100%{transform:scale(1);}
-  }
-  @keyframes hitPulse{
-    0%{transform:scale(1.4);box-shadow:0 0 30px rgba(0,255,136,0.8);}
-    100%{transform:scale(1);}
-  }
+.play-btn{margin:6px 8px 7px;padding:13px;border-radius:7px;background:linear-gradient(180deg,#2ecc71,#178a40);border:none;color:#fff;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;box-shadow:0 3px 10px rgba(46,204,113,0.25);transition:all 0.15s;flex-shrink:0;}
+.play-btn:active{transform:scale(0.98);}
+.play-btn.drawing{background:linear-gradient(180deg,#e67e22,#a04000);}
 
-  /* DRAWN NUMBERS */
-  .drawn-section{
-    margin-top:6px;
-    background:rgba(7,15,34,0.9);border:1px solid var(--border);
-    border-radius:8px;padding:5px 8px;
-  }
-  .drawn-label{font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;}
-  .drawn-track{display:flex;flex-wrap:wrap;gap:3px;min-height:18px;}
-  .drawn-pip{
-    width:20px;height:20px;border-radius:5px;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;
-  }
-  .drawn-pip.hit{background:rgba(0,255,136,0.2);color:var(--green);border:1px solid var(--green);}
-  .drawn-pip.miss2{background:rgba(245,197,24,0.1);color:var(--gold2);border:1px solid rgba(245,197,24,0.3);}
+/* TICKETS */
+.tickets{flex-shrink:0;border-top:1px solid #2a2a2a;max-height:140px;overflow-y:auto;scrollbar-width:none;}
+.tickets::-webkit-scrollbar{display:none;}
+.t-hdr{display:flex;justify-content:space-between;padding:5px 10px;font-size:10px;color:var(--dim);background:#151515;border-bottom:1px solid #222;}
+.ticket{background:#1e1e1e;border-bottom:1px solid #252525;padding:7px 10px;}
+.t-top{display:flex;justify-content:space-between;margin-bottom:5px;}
+.t-id{font-size:10px;color:var(--dim);}
+.t-st{font-size:10px;font-weight:700;}
+.t-nums{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px;}
+.tn{width:24px;height:24px;border-radius:3px;background:#2a2a2a;border:1px solid #444;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#bbb;}
+.tn.th{background:#0e2a18;border-color:var(--green);color:var(--green);}
+.tn.te{background:#111;border-color:#222;color:#222;}
+.t-ft{display:flex;justify-content:space-between;}
+.t-bet{font-size:10px;color:var(--dim);}
+.t-res{font-size:11px;font-weight:700;}
 
-  /* BET PANEL */
-  .bet-panel{
-    position:relative;z-index:10;
-    background:linear-gradient(0deg,#050e20 0%,rgba(7,15,34,0.98) 100%);
-    border-top:1px solid var(--border);
-    padding:10px 14px 12px;
-  }
-  .bet-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-  .bet-label{font-size:10px;color:var(--dim);letter-spacing:1px;width:32px;}
+/* OTHER TABS */
+.other-tab{flex:1;overflow-y:auto;padding:8px;scrollbar-width:none;}
+.other-tab::-webkit-scrollbar{display:none;}
+.h-hdr{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);padding:2px 4px 8px;}
+.h-row{background:#1e1e1e;border-radius:5px;margin-bottom:5px;padding:8px 10px;border:1px solid #2a2a2a;}
+.h-top{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.h-icon{color:var(--green);}
+.h-id{font-size:11px;font-weight:700;}
+.h-time{font-size:9px;color:var(--dim);}
+.h-nums{display:flex;flex-wrap:wrap;gap:2px;}
+.hn{font-size:9px;color:#999;background:#2a2a2a;border-radius:3px;padding:2px 4px;}
+.s-hdr{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:8px;}
+.s-row{display:flex;align-items:center;gap:6px;background:#1e1e1e;border-radius:5px;padding:6px 8px;margin-bottom:4px;}
+.s-rank{font-size:10px;color:var(--dim);width:18px;}
+.s-bw{flex:1;height:5px;background:#2a2a2a;border-radius:3px;}
+.s-bar{height:5px;background:var(--green);border-radius:3px;}
+.s-num{font-size:11px;font-weight:700;width:24px;text-align:right;}
 
-  /* Bet amount chips */
-  .bet-chips{display:flex;gap:5px;flex:1;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
-  .bet-chips::-webkit-scrollbar{display:none;}
-  .chip{
-    flex-shrink:0;padding:4px 8px;border-radius:6px;
-    font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
-    border:1.5px solid var(--border);background:var(--card);color:var(--dim);
-    cursor:pointer;transition:all 0.15s;
-  }
-  .chip.active{
-    border-color:var(--gold);color:var(--gold);
-    background:rgba(245,197,24,0.12);
-    box-shadow:var(--glow-gold);
-  }
-
-  /* Speed */
-  .speed-tabs{display:flex;gap:4px;flex:1;}
-  .speed-tab{
-    flex:1;padding:5px 2px;border-radius:6px;text-align:center;
-    font-size:10px;font-weight:700;letter-spacing:1px;
-    border:1.5px solid var(--border);background:var(--card);color:var(--dim);
-    cursor:pointer;transition:all 0.15s;
-  }
-  .speed-tab.active{border-color:var(--purple);color:var(--purple);background:rgba(179,68,255,0.12);}
-
-  /* Action Row */
-  .action-row{display:flex;gap:8px;align-items:center;}
-  .btn-auto{
-    flex:1;padding:10px;border-radius:10px;
-    font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;
-    border:1.5px solid var(--border);background:var(--card);color:var(--dim);
-    cursor:pointer;transition:all 0.2s;
-  }
-  .btn-auto.active{border-color:var(--purple);color:var(--purple);background:rgba(179,68,255,0.12);}
-  .btn-play{
-    flex:2;padding:12px;border-radius:10px;
-    font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:2px;
-    border:none;cursor:pointer;
-    background:linear-gradient(135deg,#0090ff,#0055cc);
-    color:#fff;
-    box-shadow:0 4px 20px rgba(0,144,255,0.4);
-    transition:all 0.2s;
-    position:relative;overflow:hidden;
-  }
-  .btn-play::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);
-  }
-  .btn-play:active{transform:scale(0.97);}
-  .btn-play.drawing{background:linear-gradient(135deg,#ff6600,#cc3300);box-shadow:0 4px 20px rgba(255,102,0,0.4);}
-  .btn-play.disabled{opacity:0.4;cursor:not-allowed;}
-  .btn-clear{
-    flex:1;padding:10px;border-radius:10px;
-    font-size:11px;font-weight:700;letter-spacing:1px;
-    border:1.5px solid rgba(255,59,92,0.3);background:rgba(255,59,92,0.08);color:var(--red);
-    cursor:pointer;transition:all 0.2s;
-  }
-
-  /* WIN OVERLAY */
-  .win-overlay{
-    position:fixed;inset:0;z-index:100;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(4,13,26,0.85);backdrop-filter:blur(6px);
-    opacity:0;pointer-events:none;transition:opacity 0.3s;
-  }
-  .win-overlay.show{opacity:1;pointer-events:all;}
-  .win-card{
-    background:linear-gradient(135deg,#0a1e3a,#0d2848);
-    border:2px solid var(--gold);
-    border-radius:20px;padding:30px 40px;text-align:center;
-    box-shadow:0 0 60px rgba(245,197,24,0.3);
-    animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes popIn{0%{transform:scale(0.6);opacity:0;}100%{transform:scale(1);opacity:1;}}
-  .win-label{font-size:12px;color:var(--dim);letter-spacing:3px;margin-bottom:6px;}
-  .win-amount{
-    font-family:'Orbitron',sans-serif;font-size:42px;font-weight:900;
-    color:var(--gold);text-shadow:var(--glow-gold);
-    margin-bottom:8px;
-  }
-  .win-matches{font-size:14px;color:var(--text);}
-  .win-close{
-    margin-top:20px;padding:12px 32px;border-radius:10px;
-    font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;
-    border:none;background:linear-gradient(135deg,var(--gold2),var(--gold));
-    color:#000;cursor:pointer;
-  }
-
-  /* Status msg */
-  .status-msg{
-    text-align:center;font-size:11px;color:var(--dim);
-    margin-bottom:6px;height:14px;letter-spacing:1px;
-  }
-  .status-msg.good{color:var(--green);}
-  .status-msg.bad{color:var(--red);}
-  .status-msg.info{color:var(--cyan);}
+/* WIN */
+.win-ov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.win-ov.show{opacity:1;pointer-events:all;}
+.win-card{background:#0e2018;border:2px solid var(--green);border-radius:14px;padding:26px 34px;text-align:center;box-shadow:0 0 40px rgba(46,204,113,0.3);animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{0%{transform:scale(0.5);}100%{transform:scale(1);}}
+.wt{font-size:10px;color:var(--dim);letter-spacing:3px;margin-bottom:6px;}
+.wa{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:900;color:var(--green);margin-bottom:6px;}
+.ws{font-size:12px;color:#999;margin-bottom:18px;}
+.wok{padding:11px 28px;border-radius:7px;border:none;background:var(--green-btn);color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<!-- Stars -->
-<div class="stars"><canvas id="starCanvas"></canvas></div>
-
-<!-- Win overlay -->
-<div class="win-overlay" id="winOverlay">
+<div class="win-ov" id="winOv">
   <div class="win-card">
-    <div class="win-label">YOU WIN</div>
-    <div class="win-amount" id="winAmount">$0.00</div>
-    <div class="win-matches" id="winMatches">0 of 0 matched</div>
-    <button class="win-close" onclick="closeWin()">COLLECT</button>
+    <div class="wt">YOU WIN</div>
+    <div class="wa" id="winAmt">0.00</div>
+    <div class="ws" id="winSub">0 matches</div>
+    <button class="wok" onclick="closeWin()">COLLECT</button>
   </div>
 </div>
 
-<!-- Header -->
 <div class="header">
-  <div class="logo">⚡ FASTKENO</div>
-  <div class="balance-box">
-    <span class="balance-label">BALANCE</span>
-    <span class="balance-value" id="balanceVal">$1,000.00</span>
+  <div class="logo"><span class="logo-fast">FAST</span><span class="logo-keno">KENO</span></div>
+  <div class="hdr-mid">
+    <div class="bal-pill"><span class="bal-v" id="balV">1000.00</span><span class="bal-c">ETB</span></div>
+    <div class="id-pill">ID: <span id="uid">232166</span> ✓</div>
+  </div>
+  <div class="hdr-icons"><span>☰</span><span>💬</span></div>
+</div>
+
+<div class="draw-area" id="drawArea">
+  <div class="wait-msg" id="waitMsg">
+    <div class="wait-balls">
+      <div class="wait-ball" style="font-size:10px;">80</div>
+      <div class="wait-ball" style="font-size:10px;">70</div>
+      <div class="wait-ball">1</div>
+    </div>
+    <div class="wait-t" id="waitT">Select 10 numbers</div>
+    <div class="wait-s" id="waitS">from 1 to 80</div>
+  </div>
+  <div id="drawSt" style="display:none;flex-direction:column;align-items:center;width:100%;">
+    <div class="countdown" id="cdisplay">00 : 30</div>
+    <div class="draw-counter" id="dcnt">0 / 20</div>
+    <div class="big-ball" id="bigBall">—</div>
+    <div class="drawn-row" id="drawnRow"></div>
   </div>
 </div>
 
-<!-- Main -->
-<div class="main">
-  <!-- Info bar -->
-  <div class="info-bar">
-    <div class="pick-info">PICKS: <span id="pickCount">0</span>/10 &nbsp; HITS: <span id="hitCount" style="color:var(--green)">0</span></div>
-    <div class="round-info">ROUND <span id="roundNum">1</span></div>
-  </div>
+<div class="tabs">
+  <div class="tab active" data-tab="play" onclick="sw('play')">▶ Play</div>
+  <div class="tab" data-tab="history" onclick="sw('history')">↺ History</div>
+  <div class="tab" data-tab="results" onclick="sw('results')">✓ Results</div>
+  <div class="tab" data-tab="stats" onclick="sw('stats')">📊 Stats</div>
+</div>
 
-  <!-- Game area -->
-  <div class="game-area">
-    <!-- Paytable -->
-    <div class="paytable">
-      <div class="paytable-title">PICKS<br>PAYS</div>
-      <div class="pay-rows" id="payRows"></div>
-    </div>
-
-    <!-- Grid -->
-    <div class="grid-wrap">
-      <div class="keno-grid" id="kenoGrid"></div>
-      <div class="drawn-section">
-        <div class="drawn-label">DRAWN NUMBERS</div>
-        <div class="drawn-track" id="drawnTrack"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bet Panel -->
-  <div class="bet-panel">
-    <div class="status-msg" id="statusMsg">Select 1–10 numbers to play</div>
-
+<div class="content">
+  <!-- PLAY -->
+  <div class="play-tab" id="tab-play">
+    <div class="grid-wrap"><div class="keno-grid" id="kenoGrid"></div></div>
     <div class="bet-row">
-      <div class="bet-label" style="font-size:9px;color:var(--dim);letter-spacing:1px;width:auto;margin-right:2px;">BET $</div>
-      <div class="bet-chips">
-        <div class="chip" data-val="0.20">0.20</div>
-        <div class="chip" data-val="0.50">0.50</div>
-        <div class="chip active" data-val="1.00">1.00</div>
-        <div class="chip" data-val="5.00">5.00</div>
-        <div class="chip" data-val="10.00">10.00</div>
-        <div class="chip" data-val="25.00">25.00</div>
-        <div class="chip" data-val="50.00">50.00</div>
+      <div class="bb" onclick="cb(-1)">−</div>
+      <div class="bv" id="betDisp">5.00</div>
+      <div class="bb" onclick="cb(1)">+</div>
+      <div class="bx2" onclick="dx2()">X2</div>
+      <div class="bmax" onclick="dmax()">MAX</div>
+      <div class="bset">⚙</div>
+    </div>
+    <button class="play-btn" id="playBtn" onclick="startGame()">PLAY</button>
+    <div class="tickets" id="ticketsWrap">
+      <div class="t-hdr">
+        <span>Total: <b id="totalBet">0.00</b> &nbsp;·&nbsp; Tickets: 0 &nbsp;·&nbsp; Wins: 0</span>
+        <span style="color:var(--green)">+ Add</span>
       </div>
+      <div id="ticketList"></div>
     </div>
-
-    <div class="bet-row">
-      <div class="bet-label" style="font-size:9px;color:var(--dim);letter-spacing:1px;width:auto;margin-right:6px;">SPEED</div>
-      <div class="speed-tabs">
-        <div class="speed-tab" data-ms="600">SLOW</div>
-        <div class="speed-tab active" data-ms="200">FAST</div>
-        <div class="speed-tab" data-ms="50">TURBO</div>
-      </div>
-    </div>
-
-    <div class="action-row">
-      <button class="btn-clear" onclick="clearPicks()">CLEAR</button>
-      <button class="btn-play" id="playBtn" onclick="startGame()">PLAY</button>
-      <button class="btn-auto" id="autoBtn" onclick="toggleAuto()">AUTO</button>
-    </div>
+  </div>
+  <!-- HISTORY -->
+  <div class="other-tab" id="tab-history" style="display:none;">
+    <div class="h-hdr"><span>Round ID &nbsp; Time</span><span>Numbers Drawn</span></div>
+    <div id="histList"><div style="text-align:center;color:var(--dim);padding:30px;font-size:12px;">No history yet</div></div>
+  </div>
+  <!-- RESULTS -->
+  <div class="other-tab" id="tab-results" style="display:none;">
+    <div id="resList" style="text-align:center;color:var(--dim);padding:30px;font-size:12px;">Play a round to see results.</div>
+  </div>
+  <!-- STATS -->
+  <div class="other-tab" id="tab-stats" style="display:none;">
+    <div class="s-hdr"><span>Hot Numbers (recent draws)</span><span style="color:var(--green)">Sort ≡</span></div>
+    <div id="statList"><div style="text-align:center;color:var(--dim);padding:30px;font-size:12px;">Play rounds to build stats.</div></div>
   </div>
 </div>
 
 <script>
-// ===== STARS =====
-(function(){
-  const c=document.getElementById('starCanvas');
-  const ctx=c.getContext('2d');
-  let stars=[];
-  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
-  function init(){
-    stars=[];
-    for(let i=0;i<150;i++){
-      stars.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.5,a:Math.random(),d:Math.random()*0.005+0.001});
-    }
-  }
-  function draw(){
-    ctx.clearRect(0,0,c.width,c.height);
-    stars.forEach(s=>{
-      s.a+=s.d;if(s.a>1||s.a<0)s.d*=-1;
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,220,255,${s.a*0.7})`;ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  resize();init();draw();
-  window.addEventListener('resize',()=>{resize();init();});
-})();
-
-// ===== GAME STATE =====
-const PAYTABLES = {
-  1:[0,3.5],
-  2:[0,0,5],
-  3:[0,0,2,8],
-  4:[0,0,1,4,20],
-  5:[0,0,0,3,8,50],
-  6:[0,0,0,2,5,20,100],
-  7:[0,0,0,0,3,8,30,200],
-  8:[0,0,0,0,2,5,20,80,500],
-  9:[0,0,0,0,1,3,10,40,150,1000],
-  10:[0,0,0,0,1,2,5,20,60,300,2000],
-};
-
-let balance=1000;
-let betAmount=1.00;
-let picks=new Set();
-let drawnNums=[];
-let round=1;
-let isDrawing=false;
-let drawSpeed=200;
-let autoPlay=false;
-let autoTimer=null;
-
-function fmt(v){return '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+const PAYS={1:[0,3.5],2:[0,0,5],3:[0,0,2,8],4:[0,0,1,4,20],5:[0,0,0,3,8,50],6:[0,0,0,2,5,20,100],7:[0,0,0,0,3,8,30,200],8:[0,0,0,0,2,5,20,80,500],9:[0,0,0,0,1,3,10,40,150,1000],10:[0,0,0,0,1,2,5,20,60,300,2000]};
+let bal=1000,bet=5,picks=new Set(),drawing=false,rid=232166,hist=[],stats={},cd=30,cdTimer=null;
+const fmt=v=>Number(v).toFixed(2);
+const updBal=()=>document.getElementById('balV').textContent=fmt(bal);
 
 // Build grid
-const grid=document.getElementById('kenoGrid');
+const g=document.getElementById('kenoGrid');
 for(let i=1;i<=80;i++){
-  const b=document.createElement('div');
-  b.className='ball';b.textContent=i;b.dataset.n=i;
-  b.addEventListener('click',()=>togglePick(i,b));
-  grid.appendChild(b);
+  const c=document.createElement('div');c.className='cell';c.textContent=i;c.dataset.n=i;
+  c.addEventListener('click',()=>pick(i,c));g.appendChild(c);
+}
+const getC=n=>g.querySelector(`[data-n="${n}"]`);
+
+function pick(n,el){
+  if(drawing)return;
+  if(picks.has(n)){picks.delete(n);el.className='cell';}
+  else{if(picks.size>=10)return;picks.add(n);el.className='cell selected';}
+  updWait();updTicket();
 }
 
-function getBall(n){return grid.querySelector(`[data-n="${n}"]`);}
-
-function togglePick(n,el){
-  if(isDrawing)return;
-  if(picks.has(n)){picks.delete(n);el.className='ball';}
-  else{
-    if(picks.size>=10){setStatus('Max 10 picks!','bad');return;}
-    picks.add(n);el.className='ball selected';
-  }
-  updatePickCount();
-  updatePaytable();
+function updWait(){
+  document.getElementById('waitT').textContent=picks.size?`${picks.size} number${picks.size>1?'s':''} selected`:'Select 10 numbers';
+  document.getElementById('waitS').textContent=picks.size?`Pick up to ${10-picks.size} more`:'from 1 to 80';
 }
 
-function clearPicks(){
-  if(isDrawing)return;
-  picks.forEach(n=>{getBall(n).className='ball';});
-  picks.clear();
-  updatePickCount();
-  updatePaytable();
-  setStatus('Select 1–10 numbers to play','');
+function updTicket(){
+  const tl=document.getElementById('ticketList');
+  document.getElementById('totalBet').textContent=fmt(bet);
+  if(!picks.size){tl.innerHTML='';return;}
+  const ns=[...picks].sort((a,b)=>a-b);
+  tl.innerHTML=`<div class="ticket">
+    <div class="t-top"><span class="t-id">I***x</span><span class="t-st" style="color:var(--dim)">PENDING</span></div>
+    <div class="t-nums">${[...Array(10)].map((_,i)=>i<ns.length?`<div class="tn">${ns[i]}</div>`:`<div class="tn te">·</div>`).join('')}</div>
+    <div class="t-ft"><span class="t-bet">Bet ${fmt(bet)}</span><span class="t-res" style="color:var(--dim)">Waiting</span></div>
+  </div>`;
 }
 
-function updatePickCount(){
-  document.getElementById('pickCount').textContent=picks.size;
-}
-
-function setStatus(msg,type=''){
-  const el=document.getElementById('statusMsg');
-  el.textContent=msg;el.className='status-msg'+(type?' '+type:'');
-}
-
-// Paytable
-function updatePaytable(){
-  const rows=document.getElementById('payRows');
-  rows.innerHTML='';
-  const n=picks.size;
-  if(n===0){rows.innerHTML='<div style="padding:8px 6px;font-size:9px;color:#4a6a99;text-align:center;">Pick<br>numbers</div>';return;}
-  const table=PAYTABLES[n];
-  for(let m=n;m>=0;m--){
-    const row=document.createElement('div');
-    row.className='pay-row';row.dataset.match=m;
-    const mult=table[m]||0;
-    row.innerHTML=`<span class="pay-match">${m}/${n}</span><span class="pay-mult">${mult>0?mult+'x':'—'}</span>`;
-    rows.appendChild(row);
-  }
-}
-
-function highlightPayrow(matches){
-  document.querySelectorAll('.pay-row').forEach(r=>{
-    r.classList.remove('active','highlight');
-    if(parseInt(r.dataset.match)===matches){
-      const mult=PAYTABLES[picks.size]?.[matches]||0;
-      r.classList.add(mult>0?'highlight':'active');
-    }
-  });
-}
-
-// DRAW
 async function startGame(){
-  if(isDrawing)return;
-  if(picks.size===0){setStatus('Pick at least 1 number!','bad');return;}
-  if(balance<betAmount){setStatus('Insufficient balance!','bad');return;}
-
-  isDrawing=true;
-  balance-=betAmount;
-  updateBalance();
-  document.getElementById('playBtn').textContent='DRAWING...';
-  document.getElementById('playBtn').classList.add('drawing');
-  document.getElementById('hitCount').textContent='0';
-
-  // Reset grid
-  picks.forEach(n=>{getBall(n).className='ball selected';});
-  document.querySelectorAll('.ball.drawn,.ball.selected-drawn,.ball.miss').forEach(b=>{
-    const n=parseInt(b.dataset.n);
-    if(picks.has(n))b.className='ball selected';else b.className='ball';
+  if(drawing)return;
+  if(!picks.size){alert('Pick at least 1 number!');return;}
+  if(bal<bet){alert('Insufficient balance!');return;}
+  drawing=true;bal-=bet;updBal();
+  const pb=document.getElementById('playBtn');
+  pb.textContent='DRAWING...';pb.classList.add('drawing');
+  // reset cells
+  picks.forEach(n=>getC(n).className='cell selected');
+  document.querySelectorAll('.cell.dcell,.cell.hcell,.cell.faded').forEach(c=>{
+    const n=parseInt(c.dataset.n);c.className=picks.has(n)?'cell selected':'cell';
   });
-  document.getElementById('drawnTrack').innerHTML='';
-  drawnNums=[];
-
-  // Generate 20 draws
+  // show draw UI
+  document.getElementById('waitMsg').style.display='none';
+  const ds=document.getElementById('drawSt');ds.style.display='flex';
+  document.getElementById('drawnRow').innerHTML='';
+  document.getElementById('bigBall').textContent='—';
+  document.getElementById('dcnt').textContent='0 / 20';
+  cd=30;updCd();clearInterval(cdTimer);
+  cdTimer=setInterval(()=>{cd=Math.max(0,cd-1);updCd();},1000);
+  // shuffle
   const pool=[];for(let i=1;i<=80;i++)pool.push(i);
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
   const draws=pool.slice(0,20);
-
   let hits=0;
+  const dr=document.getElementById('drawnRow');
   for(let i=0;i<draws.length;i++){
-    const n=draws[i];
-    drawnNums.push(n);
-    const ball=getBall(n);
-    const isHit=picks.has(n);
-    ball.className=isHit?'ball selected-drawn':'ball drawn';
-
-    // pip
-    const pip=document.createElement('div');
-    pip.className='drawn-pip '+(isHit?'hit':'miss2');
-    pip.textContent=n;
-    document.getElementById('drawnTrack').appendChild(pip);
-    if(isHit){hits++;document.getElementById('hitCount').textContent=hits;}
-
-    await sleep(drawSpeed);
+    const n=draws[i];stats[n]=(stats[n]||0)+1;
+    const bb=document.getElementById('bigBall');
+    bb.textContent=n;bb.classList.remove('pop');void bb.offsetWidth;bb.classList.add('pop');
+    document.getElementById('dcnt').textContent=`${i+1} / 20`;
+    const cell=getC(n);const isHit=picks.has(n);
+    cell.className=isHit?'cell hcell':'cell dcell';
+    if(isHit)hits++;
+    const mb=document.createElement('div');
+    mb.className='mini-ball'+(isHit?' mhit':'');mb.textContent=n;
+    dr.appendChild(mb);dr.scrollLeft=dr.scrollWidth;
+    await sleep(180);
   }
-
-  // Gray out undrawn, unselected
+  clearInterval(cdTimer);
   for(let i=1;i<=80;i++){
-    const b=getBall(i);
-    if(!b.classList.contains('drawn')&&!b.classList.contains('selected-drawn')&&!picks.has(i)){
-      b.className='ball miss';
-    }
+    const c=getC(i);
+    if(!c.classList.contains('dcell')&&!c.classList.contains('hcell')&&!picks.has(i))c.classList.add('faded');
   }
-
-  // Payout
-  const table=PAYTABLES[picks.size];
-  const mult=table?.[hits]||0;
-  const win=parseFloat((betAmount*mult).toFixed(2));
-  highlightPayrow(hits);
-
+  const table=PAYS[picks.size];const mult=(table&&table[hits])||0;
+  const win=parseFloat((bet*mult).toFixed(2));
+  if(win>0){bal+=win;updBal();}
+  // update ticket
+  const ns=[...picks].sort((a,b)=>a-b);
+  const hitSet=new Set(draws.filter(n=>picks.has(n)));
+  document.getElementById('ticketList').innerHTML=`<div class="ticket">
+    <div class="t-top"><span class="t-id">I***x</span><span class="t-st" style="color:${win>0?'var(--green)':'var(--dim)'}">${win>0?'WIN':'NO WIN'}</span></div>
+    <div class="t-nums">${[...Array(10)].map((_,i)=>i<ns.length?`<div class="tn ${hitSet.has(ns[i])?'th':''}">${ns[i]}</div>`:`<div class="tn te">·</div>`).join('')}</div>
+    <div class="t-ft"><span class="t-bet">Bet ${fmt(bet)}</span><span class="t-res" style="color:${win>0?'var(--green)':'var(--dim)'}">${win>0?'+'+fmt(win)+' ETB':'—'}</span></div>
+  </div>`;
+  // history
+  rid++;
+  hist.unshift({id:rid,draws:[...draws],time:new Date(),picks:[...picks],hits,win});
+  renderHist();renderStats();
   if(win>0){
-    balance+=win;updateBalance();
-    setTimeout(()=>showWin(win,hits),300);
-    setStatus(`${hits} MATCH${hits!==1?'ES':''} — WIN ${fmt(win)}`,'good');
-  } else {
-    setStatus(`${hits} match${hits!==1?'es':''} — better luck next time!`,'bad');
+    setTimeout(()=>{
+      document.getElementById('winAmt').textContent=fmt(win)+' ETB';
+      document.getElementById('winSub').textContent=`${hits} of ${picks.size} matched · ${mult}x`;
+      document.getElementById('winOv').classList.add('show');
+    },350);
   }
-
-  round++;document.getElementById('roundNum').textContent=round;
-  isDrawing=false;
-  document.getElementById('playBtn').textContent='PLAY';
-  document.getElementById('playBtn').classList.remove('drawing');
-
-  if(autoPlay&&!autoTimer){
-    autoTimer=setTimeout(()=>{autoTimer=null;if(autoPlay)startGame();},1200);
-  }
+  setTimeout(()=>{
+    drawing=false;pb.textContent='PLAY';pb.classList.remove('drawing');
+    ds.style.display='none';document.getElementById('waitMsg').style.display='block';updWait();
+  },900);
 }
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function updCd(){const s=cd;document.getElementById('cdisplay').textContent=`${String(Math.floor(s/60)).padStart(2,'0')} : ${String(s%60).padStart(2,'0')}`;}
+function closeWin(){document.getElementById('winOv').classList.remove('show');}
 
-function updateBalance(){
-  document.getElementById('balanceVal').textContent=fmt(balance);
+// Bet
+const STEPS=[0.2,0.5,1,2,5,10,20,50,100,200,500];
+function cb(d){let i=STEPS.findIndex(s=>Math.abs(s-bet)<0.01);i=Math.max(0,Math.min(STEPS.length-1,i+d));bet=STEPS[i];document.getElementById('betDisp').textContent=fmt(bet);updTicket();}
+function dx2(){bet=Math.min(500,bet*2);document.getElementById('betDisp').textContent=fmt(bet);updTicket();}
+function dmax(){bet=Math.min(bal,500);document.getElementById('betDisp').textContent=fmt(bet);updTicket();}
+
+// Tabs
+function sw(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  ['play','history','results','stats'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el)el.style.display=t===name?(t==='play'?'flex':'block'):'none';
+  });
 }
 
-function showWin(amount,matches){
-  document.getElementById('winAmount').textContent=fmt(amount);
-  document.getElementById('winMatches').textContent=`${matches} of ${picks.size} matched`;
-  document.getElementById('winOverlay').classList.add('show');
+// History
+function renderHist(){
+  const l=document.getElementById('histList');
+  if(!hist.length){l.innerHTML='<div style="text-align:center;color:var(--dim);padding:30px;font-size:12px;">No history yet</div>';return;}
+  l.innerHTML=hist.map(h=>{
+    const t=h.time,ts=`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
+    return `<div class="h-row"><div class="h-top"><span class="h-icon">✓</span><span class="h-id">${h.id}</span><span class="h-time">${ts}</span></div><div class="h-nums">${h.draws.map(n=>`<span class="hn">${n}</span>`).join('')}</div></div>`;
+  }).join('');
 }
 
-function closeWin(){document.getElementById('winOverlay').classList.remove('show'
+// Stats
+function renderStats(){
+  const l=document.getElementById('statList');
+  const sorted=Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  if(!sorted.length){l.innerHTML='<div style="text-align:center;color:var(--dim);padding:30px;font-size:12px;">Play rounds to build stats.</div>';return;}
+  const mx=sorted[0][1];
+  l.innerHTML=sorted.map(([n,c],i)=>`<div class="s-row"><span class="s-rank">${i+1}</span><div class="s-bw"><div class="s-bar" style="width:${(c/mx*100).toFixed(0)}%"></div></div><span class="s-num">${n}</span></div>`).join('');
+}
+
+updBal();updTicket();renderStats();
+</script>
+</body>
+</html>
